@@ -58,7 +58,20 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
 
     _progressTracker.init().then((_) {
       _initializeGame();
+      _startBackgroundMusic(); // Dodano: background muzika
     });
+  }
+
+  // NOVO: Background muzika za Memory game
+  void _startBackgroundMusic() {
+    _audioHelper.playBackgroundMusic(
+      'memory_background.mp3', // Dodajte ovaj fajl u assets/audio/
+      loop: true,
+    );
+
+    // Postavite volume nivoe
+    _audioHelper.setBackgroundMusicVolume(0.3); // Tiša background muzika
+    _audioHelper.setSoundEffectsVolume(0.8); // Glasniji sound effects
   }
 
   void _initializeGame() {
@@ -84,51 +97,99 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     final allAnimals = [
       MemoryCard(
         id: 'dog',
-        imagePath: 'assets/images/animals/dog.png',
+        imagePath: 'assets/images/animals/dog.JFIF',
         soundPath: 'ovo_je_pas.mp3',
         name: 'Pas',
       ),
       MemoryCard(
         id: 'cat',
-        imagePath: 'assets/images/animals/cat.png',
+        imagePath: 'assets/images/animals/cat.JFIF',
         soundPath: 'ovo_je_macka.mp3',
         name: 'Mačka',
       ),
       MemoryCard(
         id: 'bird',
-        imagePath: 'assets/images/animals/bird.png',
+        imagePath: 'assets/images/animals/bird.JFIF',
         soundPath: 'ovo_je_ptica.mp3',
         name: 'Ptica',
       ),
       MemoryCard(
         id: 'cow',
-        imagePath: 'assets/images/animals/cow.png',
+        imagePath: 'assets/images/animals/cow.JFIF',
         soundPath: 'ovo_je_krava.mp3',
         name: 'Krava',
       ),
       MemoryCard(
         id: 'sheep',
-        imagePath: 'assets/images/animals/sheep.png',
+        imagePath: 'assets/images/animals/sheep.JFIF',
         soundPath: 'ovo_je_ovca.mp3',
         name: 'Ovca',
       ),
       MemoryCard(
         id: 'horse',
-        imagePath: 'assets/images/animals/horse.png',
+        imagePath: 'assets/images/animals/horse.JFIF',
         soundPath: 'ovo_je_konj.mp3',
         name: 'Konj',
       ),
       MemoryCard(
         id: 'pig',
-        imagePath: 'assets/images/animals/pig.png',
+        imagePath: 'assets/images/animals/pig.JFIF',
         soundPath: 'ovo_je_svinja.mp3',
         name: 'Svinja',
       ),
       MemoryCard(
         id: 'duck',
-        imagePath: 'assets/images/animals/duck.png',
+        imagePath: 'assets/images/animals/duck.JFIF',
         soundPath: 'ovo_je_patka.mp3',
         name: 'Patka',
+      ),
+      MemoryCard(
+        id: 'goat',
+        imagePath: 'assets/images/animals/goat.JFIF',
+        soundPath: 'ovo_je_koza.mp3',
+        name: 'Koza',
+      ),
+      MemoryCard(
+        id: 'chicken',
+        imagePath: 'assets/images/animals/chicken.JFIF',
+        soundPath: 'ovo_je_kokos.mp3',
+        name: 'Kokoš',
+      ),
+      MemoryCard(
+        id: 'rabbit',
+        imagePath: 'assets/images/animals/rabbit.JFIF',
+        soundPath: 'ovo_je_zec.mp3',
+        name: 'Zec',
+      ),
+      MemoryCard(
+        id: 'frog',
+        imagePath: 'assets/images/animals/frog.JFIF',
+        soundPath: 'ovo_je_zaba.mp3',
+        name: 'Žaba',
+      ),
+      MemoryCard(
+        id: 'elephant',
+        imagePath: 'assets/images/animals/elephant.JFIF',
+        soundPath: 'ovo_je_slon.mp3',
+        name: 'Slon',
+      ),
+      MemoryCard(
+        id: 'lion',
+        imagePath: 'assets/images/animals/lion.JFIF',
+        soundPath: 'ovo_je_lav.mp3',
+        name: 'Lav',
+      ),
+      MemoryCard(
+        id: 'tiger',
+        imagePath: 'assets/images/animals/tiger.JFIF',
+        soundPath: 'ovo_je_tigar.mp3',
+        name: 'Tigar',
+      ),
+      MemoryCard(
+        id: 'monkey',
+        imagePath: 'assets/images/animals/monkey.JFIF',
+        soundPath: 'ovo_je_majmun.mp3',
+        name: 'Majmun',
       ),
     ];
 
@@ -178,6 +239,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
       card.isFlipped = true;
     });
 
+    // OPTIMIZOVANO: Koristi novi AudioHelper - sound se automatski čeka
     await _audioHelper.playSound('flip.mp3');
 
     if (_firstCard == null) {
@@ -195,7 +257,12 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
 
     if (_firstCard!.name == _secondCard!.name) {
       // Pronađen par!
-      await _audioHelper.playSound(_firstCard!.soundPath);
+
+      // POBOLJŠANO: Reprodukuje sekvenciju zvukova
+      await _audioHelper.playSoundSequence([
+        'match_success.mp3', // Novi zvuk za uspešan match
+        _firstCard!.soundPath,
+      ]);
 
       // Animacija za tačan odgovor
       _correctAnswerController.forward().then((_) {
@@ -216,6 +283,12 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
       }
     } else {
       // Nije par
+
+      // POBOLJŠANO: Koristi playSoundImmediate za brže feedback
+      await _audioHelper.playSoundImmediate('wrong_match.mp3');
+
+      // Pauza pa onda instrukcija
+      await Future.delayed(const Duration(milliseconds: 500));
       await _audioHelper.playSound('pokusaj_ponovo.mp3');
 
       // Animacija tresenja za netačan odgovor
@@ -241,7 +314,11 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     await _progressTracker.saveHighScore('memory', _score);
     await _progressTracker.incrementAttempts('memory');
 
-    await _audioHelper.playSound('bravo.mp3');
+    // POBOLJŠANO: Triumfalna sekvenca zvukova
+    await _audioHelper.playSoundSequence([
+      'game_complete.mp3', // Novi celebration sound
+      'bravo.mp3',
+    ]);
 
     if (!mounted) return;
 
@@ -279,6 +356,27 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
+            ),
+            // NOVO: Audio kontrole u win dialog
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    await _audioHelper.pauseBackgroundMusic();
+                  },
+                  icon: const Icon(Icons.pause, size: 30),
+                  tooltip: 'Pauziraj muziku',
+                ),
+                IconButton(
+                  onPressed: () async {
+                    await _audioHelper.resumeBackgroundMusic();
+                  },
+                  icon: const Icon(Icons.play_arrow, size: 30),
+                  tooltip: 'Nastavi muziku',
+                ),
+              ],
             ),
           ],
         ),
@@ -354,8 +452,34 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, size: 30),
-          onPressed: () => context.go('/memory-levels'),
+          onPressed: () async {
+            // POBOLJŠANO: Zaustavi background muziku kad izlaziš
+            await _audioHelper.stopBackgroundMusic();
+            if (context.mounted) {
+              context.go('/memory-levels');
+            }
+          },
         ),
+        // NOVO: Audio kontrole u AppBar
+        actions: [
+          IconButton(
+            onPressed: () async {
+              if (_audioHelper.isBackgroundMusicPlaying) {
+                await _audioHelper.pauseBackgroundMusic();
+              } else {
+                await _audioHelper.resumeBackgroundMusic();
+              }
+              setState(() {}); // Refresh UI
+            },
+            icon: Icon(
+              _audioHelper.isBackgroundMusicPlaying
+                  ? Icons.volume_up
+                  : Icons.volume_off,
+              size: 30,
+            ),
+            tooltip: 'Uključi/isključi muziku',
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -385,6 +509,30 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
                   ],
                 ),
               ),
+              // NOVO: Audio status indicator
+              if (_audioHelper.isSoundEffectPlaying)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.volume_up,
+                          size: 16, color: Colors.orange),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Reprodukuje se zvuk (${_audioHelper.soundQueueLength} u redu)',
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.orange),
+                      ),
+                    ],
+                  ),
+                ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -553,7 +701,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     _flipController.dispose();
     _matchController.dispose();
     _correctAnswerController.dispose();
-    _audioHelper.dispose();
+    _audioHelper.stopBackgroundMusic();
+
     super.dispose();
   }
 }

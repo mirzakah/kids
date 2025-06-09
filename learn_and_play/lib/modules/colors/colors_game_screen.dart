@@ -598,7 +598,6 @@ class _ColorsGameScreenState extends State<ColorsGameScreen>
     _animationController.dispose();
     _confettiController.dispose();
     _shakeController.dispose();
-    _audioHelper.dispose();
     super.dispose();
   }
 }

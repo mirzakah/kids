@@ -92,7 +92,7 @@ class _MatchingGameScreenState extends State<MatchingGameScreen>
           label: 'Riba'),
       rightItem: MatchingItem(
           id: 'water',
-          imagePath: 'assets/images/matching/water.png',
+          imagePath: 'assets/images/matching/aquarium.jpeg',
           label: 'Voda'),
       color: Colors.cyan,
     ),
